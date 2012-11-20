@@ -28,7 +28,7 @@
 //  colorstatus patch.  There are also "extended" characters selected to work
 //  with terminus2 font for symbols and trianlge "flags".
 #define CPU_STR			"Ü	 Ï %d%% Ü"				// CPU percent when below CPU_HI%
-#define CPU_HI_STR		"Ü Ï %d%% Ü"				// CPU percent when above CPU_HI%
+#define CPU_HI_STR		"Ü Ï %d%% Ü"				// CPU percent when above CPU_HI%
 #define MEM_STR			"Ü %d%% Ý %d%% Ý %ld%% Ü"	// memory, takes (up to) 3 integers: free, buffers, and cache
 #define VOL_STR			"Ü	 Ô %d% Ü"				// volume when not muted  IMPORTANT! SEE NOTE IN README FOR AUDO INFO
 #define VOL_MUTE_STR	"Ü	 Ô × Ü"					// volume when muted
