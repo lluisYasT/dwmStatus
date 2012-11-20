@@ -41,8 +41,8 @@ int main() {
 	Display *dpy;
 	Window root;
 	int num;
-	long jif1,jif2,jif3,jift;
-	long lnum1,lnum2,lnum3,lnum4;
+	long jif1,jif2,jif3,jift,total_prev;
+	long lnum1,lnum2,lnum3,lnum4,total;
 	char statnext[30], status[100];
 	time_t current;
 	FILE *infile;
@@ -64,11 +64,12 @@ int main() {
 		infile = fopen(CPU_FILE,"r");
 		fscanf(infile,"cpu %ld %ld %ld %ld",&lnum1,&lnum2,&lnum3,&lnum4);
 		fclose(infile);
-		if (lnum4>jift)
-			num = (int) 100*(((lnum1-jif1)+(lnum2-jif2)+(lnum3-jif3))/(lnum4-jift));
+    total = lnum1 + lnum2 + lnum3 +lnum4;
+		if (total != total_prev)
+      num = (int) 100 * ((total - total_prev) - (lnum4 - jift)) / (total - total_prev);
 		else
 			num = 0;
-		jif1=lnum1; jif2=lnum2; jif3=lnum3; jift=lnum4;
+    total_prev = total; jift = lnum4;
 		if (num > CPU_HI)
 			sprintf(statnext,CPU_HI_STR,num);
 		else
@@ -80,33 +81,6 @@ int main() {
 			&lnum1,&lnum2,&lnum3,&lnum4);
 		fclose(infile);
 		sprintf(statnext,MEM_STR,100*lnum2/lnum1,100*lnum3/lnum1,100*lnum4/lnum1);
-		strcat(status,statnext);
-	// Audio volume:
-		infile = fopen(AUD_FILE,"r");
-		fscanf(infile,"%d",&num);
-		fclose(infile);
-		if (num == -1)
-			sprintf(statnext,VOL_MUTE_STR,num);
-		else
-			sprintf(statnext,VOL_STR,num);
-		strcat(status,statnext);
-	// Power / Battery:
-		infile = fopen(BATT_NOW,"r");
-			fscanf(infile,"%ld\n",&lnum1);fclose(infile);
-		infile = fopen(BATT_FULL,"r");
-			fscanf(infile,"%ld\n",&lnum2);fclose(infile);
-		infile = fopen(BATT_STAT,"r");
-			fscanf(infile,"%s\n",statnext);fclose(infile);
-		num = lnum1*100/lnum2;
-		if (strncmp(statnext,"Charging",8) == 0) {
-			sprintf(statnext,BAT_CHRG_STR,num);
-		}
-		else {
-			if (num < BATT_LOW)
-				sprintf(statnext,BAT_LOW_STR,num);
-			else
-				sprintf(statnext,BAT_STR,num);
-		}
 		strcat(status,statnext);
 	// Date & Time:
 		time(&current);
