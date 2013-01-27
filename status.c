@@ -20,9 +20,9 @@
 #define CPU_FILE		"/proc/stat"
 #define MEM_FILE		"/proc/meminfo"
 #define AUD_FILE		"/home/jmcclure/.status_info"
-#define BATT_NOW		"/sys/class/power_supply/BAT1/charge_now"
-#define BATT_FULL		"/sys/class/power_supply/BAT1/charge_full"
-#define BATT_STAT		"/sys/class/power_supply/BAT1/status"
+#define BATT_NOW		"/sys/class/power_supply/BAT0/energy_now"
+#define BATT_FULL		"/sys/class/power_supply/BAT0/energy_full"
+#define BATT_STAT		"/sys/class/power_supply/BAT0/status"
 // Display format strings:
 //  Defaults make extensive use of escape characters for colors which require
 //  colorstatus patch.  There are also "extended" characters selected to work
@@ -82,6 +82,28 @@ int main() {
 		fclose(infile);
 		sprintf(statnext,MEM_STR,100*lnum2/lnum1,100*lnum3/lnum1,100*lnum4/lnum1);
 		strcat(status,statnext);
+    // Battery:
+        infile = fopen(BATT_NOW,"r");
+        fscanf(infile,"%ld\n",&lnum1);
+        fclose(infile);
+        infile = fopen(BATT_FULL,"r");
+        fscanf(infile,"%ld\n",&lnum2);
+        fclose(infile);
+        infile = fopen(BATT_STAT,"r");
+        fscanf(infile,"%ld\n",&statnext);
+        fclose(infile);
+        num = lnum1 * 100 / lnum2;
+        if (strncmp(statnext, "Charging",8) == 0) {
+            sprintf(statnext,BAT_CHRG_STR,num);
+        }
+        else {
+            if (num < BATT_LOW)
+                sprintf(statnext, BAT_LOW_STR, num);
+            else
+                sprintf(statnext, BAT_STR, num);
+        }
+        strcat(status,statnext);
+
 	// Date & Time:
 		time(&current);
 		strftime(statnext,38,DATE_TIME_STR,localtime(&current));
