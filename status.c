@@ -19,7 +19,7 @@
 // Files read for system info:
 #define CPU_FILE		"/proc/stat"
 #define MEM_FILE		"/proc/meminfo"
-#define AUD_FILE		"/home/jmcclure/.status_info"
+#define AUD_FILE		"/home/lluis/.status_info"
 #define BATT_NOW		"/sys/class/power_supply/BAT0/energy_now"
 #define BATT_FULL		"/sys/class/power_supply/BAT0/energy_full"
 #define BATT_STAT		"/sys/class/power_supply/BAT0/status"
@@ -27,7 +27,7 @@
 //  Defaults make extensive use of escape characters for colors which require
 //  colorstatus patch.  There are also "extended" characters selected to work
 //  with terminus2 font for symbols and trianlge "flags".
-#define CPU_STR			"Ü	 Ï %d%% Ü"				// CPU percent when below CPU_HI%
+/* #define CPU_STR			"Ü	 Ï %d%% Ü"				// CPU percent when below CPU_HI%
 #define CPU_HI_STR		"Ü Ï %d%% Ü"				// CPU percent when above CPU_HI%
 #define MEM_STR			"Ü %d%% Ý %d%% Ý %ld%% Ü"	// memory, takes (up to) 3 integers: free, buffers, and cache
 #define VOL_STR			"Ü	 Ô %d% Ü"				// volume when not muted  IMPORTANT! SEE NOTE IN README FOR AUDO INFO
@@ -36,6 +36,17 @@
 #define BAT_LOW_STR		"Ü %d%% Ü"					// Battery, unplugged, below BATT_LOW% remaining
 #define BAT_CHRG_STR	"Ü %d%% Ü"					// Battery, when charging (plugged into AC)
 #define DATE_TIME_STR	"Ü %a %b %d ÜÜ Õ %H:%M "	// This is a strftime format string which is passed localtime
+*/
+
+#define CPU_STR				"  CPU: %d%%  "
+#define CPU_HI_STR		"  CPU: %d%%  "
+#define MEM_STR				"  MEM: %d%% %d%% %ld%%  "
+#define VOL_STR				"  VOL: %d%%  "
+#define VOL_MUTE_STR	"  VOL: M  "
+#define BAT_STR				"  BAT: %d%%  "
+#define BAT_LOW_STR		"  BAT: %d%%  "
+#define BAT_CHRG_STR	"  BAT: %d%%  "
+#define DATE_TIME_STR	"  %a %b %d  %H:%M  "
 
 int main() {
 	Display *dpy;
@@ -105,9 +116,9 @@ int main() {
         strcat(status,statnext);
 
 	// Date & Time:
-		time(&current);
-		strftime(statnext,38,DATE_TIME_STR,localtime(&current));
-		strcat(status,statnext);
+	//	time(&current);
+	//	strftime(statnext,38,DATE_TIME_STR,localtime(&current));
+	//	strcat(status,statnext);
 	// Set root name
 		XStoreName(dpy,root,status);
 		XFlush(dpy);
