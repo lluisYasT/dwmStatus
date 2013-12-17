@@ -20,9 +20,11 @@
 #define CPU_FILE		"/proc/stat"
 #define MEM_FILE		"/proc/meminfo"
 #define AUD_FILE		"/home/lluis/.status_info"
+#ifdef BATTERY
 #define BATT_NOW		"/sys/class/power_supply/BAT0/energy_now"
 #define BATT_FULL		"/sys/class/power_supply/BAT0/energy_full"
 #define BATT_STAT		"/sys/class/power_supply/BAT0/status"
+#endif
 // Display format strings:
 //  Defaults make extensive use of escape characters for colors which require
 //  colorstatus patch.  There are also "extended" characters selected to work
@@ -94,6 +96,7 @@ int main() {
 		sprintf(statnext,MEM_STR,100*lnum2/lnum1,100*lnum3/lnum1,100*lnum4/lnum1);
 		strcat(status,statnext);
     // Battery:
+#ifdef BATTERY
         infile = fopen(BATT_NOW,"r");
         fscanf(infile,"%ld\n",&lnum1);
         fclose(infile);
@@ -114,11 +117,11 @@ int main() {
                 sprintf(statnext, BAT_STR, num);
         }
         strcat(status,statnext);
-
+#endif
 	// Date & Time:
-	//	time(&current);
-	//	strftime(statnext,38,DATE_TIME_STR,localtime(&current));
-	//	strcat(status,statnext);
+		time(&current);
+		strftime(statnext,38,DATE_TIME_STR,localtime(&current));
+		strcat(status,statnext);
 	// Set root name
 		XStoreName(dpy,root,status);
 		XFlush(dpy);
