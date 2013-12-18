@@ -1,7 +1,10 @@
 PREFIX=/usr/local
+ifeq "$(HOSTNAME)" "$(enigma)"
+	BATTERY=-DBATTERY
+endif
 
 dwmStatus: status.c
-	gcc -o dwmStatus status.c -lX11
+	gcc $(BATTERY) -o dwmStatus status.c -lX11
 
 install: dwmStatus
 	@echo "Installing dwmStatus in ${PREFIX}/bin"
