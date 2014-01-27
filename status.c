@@ -24,6 +24,7 @@
 #define BATT_NOW		"/sys/class/power_supply/BAT0/energy_now"
 #define BATT_FULL		"/sys/class/power_supply/BAT0/energy_full"
 #define BATT_STAT		"/sys/class/power_supply/BAT0/status"
+#define POWER_NOW		"/sys/class/power_supply/BAT0/power_now"
 #endif
 // Display format strings:
 //  Defaults make extensive use of escape characters for colors which require
@@ -45,15 +46,15 @@
 #define MEM_STR				"  MEM: %d%% %d%% %ld%%  "
 #define VOL_STR				"  VOL: %d%%  "
 #define VOL_MUTE_STR	"  VOL: M  "
-#define BAT_STR				"  BAT: %d%%  "
-#define BAT_LOW_STR		"  BAT: %d%%  "
-#define BAT_CHRG_STR	"  BAT: %d%%  "
+#define BAT_STR				"  BAT: %d%% %5d mW  "
+#define BAT_LOW_STR		"  BAT: %d%% %5d mW  "
+#define BAT_CHRG_STR	"  BAT: %d%% %5d mW  "
 #define DATE_TIME_STR	"  %a %b %d  %H:%M  "
 
 int main() {
 	Display *dpy;
 	Window root;
-	int num;
+	int num, power;
 	long jif1,jif2,jif3,jift,total_prev;
 	long lnum1,lnum2,lnum3,lnum4,total;
 	char statnext[30], status[100];
@@ -107,14 +108,20 @@ int main() {
         fscanf(infile,"%ld\n",&statnext);
         fclose(infile);
         num = lnum1 * 100 / lnum2;
+
+        infile = fopen(POWER_NOW, "r");
+        fscanf(infile,"%ld\n",&lnum3);
+        power = lnum3 / 1000;
+        fclose(infile);
+
         if (strncmp(statnext, "Charging",8) == 0) {
-            sprintf(statnext,BAT_CHRG_STR,num);
+            sprintf(statnext,BAT_CHRG_STR,num,power);
         }
         else {
             if (num < BATT_LOW)
-                sprintf(statnext, BAT_LOW_STR, num);
+                sprintf(statnext, BAT_LOW_STR, num,power);
             else
-                sprintf(statnext, BAT_STR, num);
+                sprintf(statnext, BAT_STR, num,power);
         }
         strcat(status,statnext);
 #endif
