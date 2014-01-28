@@ -55,14 +55,14 @@ int main() {
 	Display *dpy;
 	Window root;
 	int num, power;
-	long jif1,jif2,jif3,jift,total_prev;
-	long lnum1,lnum2,lnum3,lnum4,total;
+	long jif1, jif2, jif3, jift, total_prev;
+	long lnum1, lnum2, lnum3, lnum4, total;
 	char statnext[30], status[100];
 	time_t current;
 	FILE *infile;
 	// get initial jiffies
-	infile = fopen(CPU_FILE,"r");
-	fscanf(infile,"cpu %ld %ld %ld %ld",&jif1,&jif2,&jif3,&jift);
+	infile = fopen(CPU_FILE, "r");
+	fscanf(infile, "cpu %ld %ld %ld %ld", &jif1, &jif2, &jif3, &jift);
 	fclose(infile);
 	// Setup X display and root window id:
 	dpy=XOpenDisplay(NULL);
@@ -70,71 +70,71 @@ int main() {
 		fprintf(stderr, "ERROR: could not open display\n");
 		exit(1);
 	}
-	root = XRootWindow(dpy,DefaultScreen(dpy));
-// MAIN LOOP STARTS HERE:
+	root = XRootWindow(dpy, DefaultScreen(dpy));
+	// MAIN LOOP STARTS HERE:
 	for (;;) {
 		status[0]='\0';
-	// CPU use:
-		infile = fopen(CPU_FILE,"r");
-		fscanf(infile,"cpu %ld %ld %ld %ld",&lnum1,&lnum2,&lnum3,&lnum4);
+		// CPU use:
+		infile = fopen(CPU_FILE, "r");
+		fscanf(infile, "cpu %ld %ld %ld %ld", &lnum1, &lnum2, &lnum3, &lnum4);
 		fclose(infile);
-    total = lnum1 + lnum2 + lnum3 +lnum4;
+		total = lnum1 + lnum2 + lnum3 +lnum4;
 		if (total != total_prev)
-      num = (int) 100 * ((total - total_prev) - (lnum4 - jift)) / (total - total_prev);
+			num = (int) 100 * ((total - total_prev) - (lnum4 - jift)) / (total - total_prev);
 		else
 			num = 0;
-    total_prev = total; jift = lnum4;
+		total_prev = total; jift = lnum4;
 		if (num > CPU_HI)
-			sprintf(statnext,CPU_HI_STR,num);
+			sprintf(statnext, CPU_HI_STR, num);
 		else
-			sprintf(statnext,CPU_STR,num);
-		strcat(status,statnext);
-	// Memory use:
-		infile = fopen(MEM_FILE,"r");
-		fscanf(infile,"MemTotal: %ld kB\nMemFree: %ld kB\nBuffers: %ld kB\nCached: %ld kB\n",
-			&lnum1,&lnum2,&lnum3,&lnum4);
+			sprintf(statnext, CPU_STR, num);
+		strcat(status, statnext);
+		// Memory use:
+		infile = fopen(MEM_FILE, "r");
+		fscanf(infile, "MemTotal: %ld kB\nMemFree: %ld kB\nBuffers: %ld kB\nCached: %ld kB\n",
+				&lnum1, &lnum2, &lnum3, &lnum4);
 		fclose(infile);
-		sprintf(statnext,MEM_STR,100*lnum2/lnum1,100*lnum3/lnum1,100*lnum4/lnum1);
-		strcat(status,statnext);
-    // Battery:
+		sprintf(statnext, MEM_STR, 100*lnum2/lnum1, 100*lnum3/lnum1, 100*lnum4/lnum1);
+		strcat(status, statnext);
+		// Battery:
 #ifdef BATTERY
-        infile = fopen(BATT_NOW,"r");
-        fscanf(infile,"%ld\n",&lnum1);
-        fclose(infile);
-        infile = fopen(BATT_FULL,"r");
-        fscanf(infile,"%ld\n",&lnum2);
-        fclose(infile);
-        infile = fopen(BATT_STAT,"r");
-        fscanf(infile,"%ld\n",&statnext);
-        fclose(infile);
-        num = lnum1 * 100 / lnum2;
+		infile = fopen(BATT_NOW, "r");
+		fscanf(infile, "%ld\n", &lnum1);
+		fclose(infile);
+		infile = fopen(BATT_FULL, "r");
+		fscanf(infile, "%ld\n", &lnum2);
+		fclose(infile);
+		infile = fopen(BATT_STAT, "r");
+		fscanf(infile, "%ld\n", &statnext);
+		fclose(infile);
+		num = lnum1 * 100 / lnum2;
 
-        infile = fopen(POWER_NOW, "r");
-        fscanf(infile,"%ld\n",&lnum3);
-        power = lnum3 / 1000;
-        fclose(infile);
+		infile = fopen(POWER_NOW, "r");
+		fscanf(infile, "%ld\n", &lnum3);
+		power = lnum3 / 1000;
+		fclose(infile);
 
-        if (strncmp(statnext, "Charging",8) == 0) {
-            sprintf(statnext,BAT_CHRG_STR,num,power);
-        }
-        else {
-            if (num < BATT_LOW)
-                sprintf(statnext, BAT_LOW_STR, num,power);
-            else
-                sprintf(statnext, BAT_STR, num,power);
-        }
-        strcat(status,statnext);
+		if (strncmp(statnext, "Charging", 8) == 0) {
+			sprintf(statnext, BAT_CHRG_STR, num, power);
+		}
+		else {
+			if (num < BATT_LOW)
+				sprintf(statnext, BAT_LOW_STR, num, power);
+			else
+				sprintf(statnext, BAT_STR, num, power);
+		}
+		strcat(status, statnext);
 #endif
-	// Date & Time:
+		// Date & Time:
 		time(&current);
-		strftime(statnext,38,DATE_TIME_STR,localtime(&current));
-		strcat(status,statnext);
-	// Set root name
-		XStoreName(dpy,root,status);
+		strftime(statnext, 38, DATE_TIME_STR, localtime(&current));
+		strcat(status, statnext);
+		// Set root name
+		XStoreName(dpy, root, status);
 		XFlush(dpy);
 		sleep(INTERVAL);
 	}
-// NEXT LINES SHOULD NEVER EXECUTE, only here to satisfy my O.C.D.
+	// NEXT LINES SHOULD NEVER EXECUTE, only here to satisfy my O.C.D.
 	XCloseDisplay(dpy);
 	return 0;
 }
