@@ -2,8 +2,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <X11/Xlib.h>
+#include <stdarg.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 // Below BATT_LOW% left on battery, the battery display turns red
 #define BATT_LOW	11
@@ -20,6 +25,11 @@
 #define CPU_FILE		"/proc/stat"
 #define MEM_FILE		"/proc/meminfo"
 #define AUD_FILE		"/home/lluis/.status_info"
+
+#define GMAIL       "/home/lluis/Mail/Gmail/INBOX/new"
+#define WSN         "/home/lluis/Mail/WSN/INBOX/new"
+#define UPV         "/home/lluis/Mail/UPV/INBOX/new"
+
 #ifdef BATTERY
 #define BATT_NOW		"/sys/class/power_supply/BAT0/energy_now"
 #define BATT_FULL		"/sys/class/power_supply/BAT0/energy_full"
@@ -51,13 +61,52 @@
 #define BAT_CHRG_STR	"  BAT: %d%% %5d mW  "
 #define DATE_TIME_STR	"  %a %b %d  %H:%M  "
 
+char *smprintf(char *fmt, ...) {
+  va_list fmtargs;
+  char *buf = NULL;
+
+  va_start(fmtargs, fmt);
+  if (vasprintf(&buf, fmt, fmtargs) == -1) {
+    fprintf(stderr, "malloc vasprintf\n");
+    exit(1);
+  }
+  va_end(fmtargs);
+  return buf;
+}
+
+char *get_nmail(char *directory, char *label) {
+  /* directory: Mail dir path
+   * return label: number_of_new_emails
+   */
+
+  int n = 0;
+  DIR* dir = NULL;
+  struct dirent* rf = NULL;
+
+  dir = opendir(directory); /* try to open a directory */
+  if (dir == NULL)
+    perror("");
+
+  while ((rf = readdir(dir)) != NULL) { /* count number of files */
+    if (strcmp(rf->d_name, ".") != 0 &&
+        strcmp(rf->d_name, "..") != 0)
+      n++;
+  }
+  closedir(dir);
+
+  if (n == 0)
+    return smprintf("");
+  else
+    return smprintf("%s%d", label, n);
+}
+
 int main() {
 	Display *dpy;
 	Window root;
 	int num, power;
 	long jif1, jif2, jif3, jift, total_prev;
 	long lnum1, lnum2, lnum3, lnum4, total;
-	char statnext[30], status[100];
+	char statnext[50], status[200];
 	time_t current;
 	FILE *infile;
 	// get initial jiffies
@@ -125,6 +174,25 @@ int main() {
 		}
 		strcat(status, statnext);
 #endif
+    // Mail
+    char *new_gmail = NULL, *new_wsn = NULL, *new_upv = NULL;
+    struct stat dir;
+    if(stat(GMAIL, &dir) == 0) {
+      new_gmail = get_nmail(GMAIL, "Gmail:");
+      strcat(status, new_gmail);
+      free(new_gmail);
+    }
+    if(stat(WSN, &dir) == 0) {
+      new_wsn = get_nmail(WSN, "WSN:");
+      strcat(status, new_wsn);
+      free(new_wsn);
+    }
+    if(stat(UPV, &dir) == 0) {
+      new_wsn = get_nmail(UPV, "UPV:");
+      strcat(status, new_wsn);
+      free(new_upv);
+    }
+
 		// Date & Time:
 		time(&current);
 		strftime(statnext, 38, DATE_TIME_STR, localtime(&current));
